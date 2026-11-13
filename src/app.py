@@ -14,9 +14,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("local_bot")
 
 app = FastAPI(
-    title="Local Shop WhatsApp Bot Agency Platform",
-    description="Multi-tenant agency portal with Super Admin controls and Shopkeeper self-service.",
-    version="3.0.0",
+    title="Local Shop WhatsApp Bot Platform",
+    description="Multi-tenant agency platform with secure Super Admin audit logs.",
+    version="3.1.0",
 )
 
 whatsapp_service = WhatsAppService()
@@ -25,16 +25,18 @@ broadcast_service = BroadcastService(whatsapp_service)
 ADMIN_USER = "naman"
 ADMIN_PASS = "balleballe"
 
+# ==================== PUBLIC LANDING PAGE (NO SUPER ADMIN LINK) ====================
+
 @app.get("/", response_class=HTMLResponse)
 async def landing_page():
-    """Responsive Landing Page for Phone and PC."""
+    """Clean Public Landing Page. Super Admin link is completely removed."""
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>LocalBot Agency - WhatsApp Automation</title>
+        <title>LocalBot Platform - WhatsApp Retail Automation</title>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 min-h-screen text-slate-100 flex flex-col justify-between font-sans">
@@ -43,33 +45,27 @@ async def landing_page():
                 <span class="text-2xl">🤖</span>
                 <span class="font-bold text-lg md:text-xl tracking-tight text-white">LocalBot Platform</span>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="/login" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs md:text-sm px-4 py-2 rounded-lg transition shadow">
-                    Shopkeeper Login
-                </a>
-                <a href="/admin0770" class="text-slate-400 hover:text-white text-xs font-mono transition">
-                    Agency Admin
+            <div>
+                <a href="/login" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs md:text-sm px-5 py-2.5 rounded-xl transition shadow">
+                    Shopkeeper Login 🛍️
                 </a>
             </div>
         </nav>
 
-        <main class="max-w-4xl w-full mx-auto px-4 py-8 text-center my-auto">
+        <main class="max-w-3xl w-full mx-auto px-4 py-12 text-center my-auto">
             <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs uppercase tracking-wider font-semibold px-3 py-1 rounded-full">
                 WhatsApp Automation for Local Retailers
             </span>
-            <h1 class="text-3xl md:text-5xl font-extrabold text-white mt-4 leading-tight">
+            <h1 class="text-3xl md:text-5xl font-extrabold text-white mt-5 leading-tight">
                 Turn Local Shops into 24/7 WhatsApp Ordering Hubs
             </h1>
-            <p class="text-slate-300 text-sm md:text-base mt-4 max-w-2xl mx-auto">
+            <p class="text-slate-300 text-sm md:text-base mt-4 max-w-xl mx-auto">
                 Automated customer receipts, live owner notifications, and one-click broadcast offers for Kirana, Spices, Salons & Clinics.
             </p>
 
-            <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center max-w-xs mx-auto">
-                <a href="/login" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition">
-                    Shopkeeper Portal 🛍️
-                </a>
-                <a href="/admin0770" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-3 px-6 rounded-xl border border-slate-700 transition">
-                    Super Admin 🔒
+            <div class="mt-8 flex justify-center">
+                <a href="/login" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition text-base">
+                    Shopkeeper Portal 🏪
                 </a>
             </div>
         </main>
@@ -82,9 +78,10 @@ async def landing_page():
     """
     return HTMLResponse(content=html)
 
+# ==================== SHOPKEEPER LOGIN (/login) ====================
+
 @app.get("/login", response_class=HTMLResponse)
 async def shopkeeper_login(error: Optional[str] = None):
-    """Shopkeeper Mobile & Desktop Login."""
     err_banner = f'<div class="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-3 rounded-lg mb-4 text-center font-semibold">{error}</div>' if error else ''
     html = f"""
     <!DOCTYPE html>
@@ -146,15 +143,16 @@ async def verify_auth(phone: str = Form(...), pin: str = Form(...)):
                 break
 
     if matched_tenant:
+        db.log_activity(matched_tenant, clean, "SHOPKEEPER_LOGIN_SUCCESS", f"Shopkeeper logged into {matched_tenant}")
         return RedirectResponse(url=f"/dashboard?tenant_id={matched_tenant}&auth_key={pin}", status_code=303)
 
+    db.log_activity("unknown", clean, "SHOPKEEPER_LOGIN_FAILED", f"Attempted login with PIN {pin}")
     return RedirectResponse(url="/login?error=Invalid+Phone+Number+or+PIN.+Please+contact+admin.", status_code=303)
 
-# ==================== SUPER ADMIN (Naman: /admin0770) ====================
+# ==================== SUPER ADMIN (/admin0770) ====================
 
 @app.get("/admin0770", response_class=HTMLResponse)
 async def admin_login_page(error: Optional[str] = None):
-    """Hidden Super Admin Login Page."""
     err = f'<div class="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-3 rounded-lg mb-4 text-center font-semibold">{error}</div>' if error else ''
     html = f"""
     <!DOCTYPE html>
@@ -209,9 +207,10 @@ async def process_admin_login(username: str = Form(...), password: str = Form(..
 
 @app.get("/admin0770/dashboard", response_class=HTMLResponse)
 async def admin_dashboard(auth: Optional[str] = None):
-    """Super Admin Panel: View all shops, add new shops in raw/simple mode."""
     tenants = tenant_manager.cache
+    activities = db.list_activities(limit=40)
 
+    # 1. Shop Cards with explicit Login Credentials
     cards_html = ""
     for tid, t in tenants.items():
         cards_html += f"""
@@ -223,19 +222,49 @@ async def admin_dashboard(auth: Optional[str] = None):
                 </div>
                 <h3 class="text-base font-bold text-white">{t.get('business_name')}</h3>
                 <p class="text-slate-400 text-xs mt-1">{t.get('category')}</p>
+                
+                <!-- Explicit Shopkeeper Login Credentials Box -->
+                <div class="bg-slate-950 border border-slate-800 rounded-lg p-3 mt-3">
+                    <span class="text-[10px] font-mono text-indigo-400 uppercase tracking-wider block mb-1">🔑 Shopkeeper Credentials:</span>
+                    <p class="text-xs font-mono text-slate-300">Login Phone: <strong class="text-emerald-400">{t.get('owner_phone', t.get('phone'))}</strong></p>
+                    <p class="text-xs font-mono text-slate-300">Secret PIN: <strong class="text-amber-400">{t.get('pin_code', '7890')}</strong></p>
+                </div>
+
                 <div class="text-slate-400 text-xs mt-3 space-y-1">
-                    <p>📞 Phone: <span class="text-slate-200">{t.get('phone')}</span></p>
-                    <p>🕒 Hours: <span class="text-slate-200">{t.get('hours')}</span></p>
-                    <p>🔑 PIN: <span class="text-slate-200 font-mono">{t.get('pin_code', '7890')}</span></p>
+                    <p>🕒 Hours: <span class="text-slate-300">{t.get('hours')}</span></p>
+                    <p>📍 Address: <span class="text-slate-300">{t.get('address')}</span></p>
                 </div>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-800 flex gap-2">
-                <a href="/dashboard?tenant_id={tid}&auth_key=7890" target="_blank" class="w-full text-center bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 rounded-lg transition">
-                    View Shop Portal ↗
+                <a href="/dashboard?tenant_id={tid}&auth_key={t.get('pin_code', '7890')}" target="_blank" class="w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2 rounded-lg transition">
+                    Open Dashboard ↗
                 </a>
             </div>
         </div>
         """
+
+    # 2. Live User Activity Feed (Super Admin sees what every customer does)
+    activity_rows = ""
+    for act in activities:
+        badge_color = "bg-slate-800 text-slate-300"
+        if "ORDER" in act['action_type']:
+            badge_color = "bg-emerald-950 text-emerald-400 border border-emerald-800"
+        elif "LOGIN" in act['action_type']:
+            badge_color = "bg-indigo-950 text-indigo-300 border border-indigo-800"
+        elif "MESSAGE" in act['action_type']:
+            badge_color = "bg-amber-950 text-amber-300 border border-amber-800"
+
+        activity_rows += f"""
+        <tr class="border-b border-slate-800/60 hover:bg-slate-800/30 text-xs">
+            <td class="p-3 font-mono text-slate-500 whitespace-nowrap">{act['created_at']}</td>
+            <td class="p-3 font-mono text-indigo-400 whitespace-nowrap">{act['tenant_id']}</td>
+            <td class="p-3 font-mono text-slate-300 whitespace-nowrap">{act['actor']}</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-mono {badge_color}">{act['action_type']}</span></td>
+            <td class="p-3 text-slate-300 font-mono">{act['details']}</td>
+        </tr>
+        """
+    if not activity_rows:
+        activity_rows = "<tr><td colspan='5' class='p-6 text-center text-slate-500 text-xs'>No user activity recorded yet. Try texting 'target' on WhatsApp!</td></tr>"
 
     html = f"""
     <!DOCTYPE html>
@@ -247,16 +276,16 @@ async def admin_dashboard(auth: Optional[str] = None):
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 font-sans">
-        <div class="max-w-6xl mx-auto">
+        <div class="max-w-7xl mx-auto">
             <header class="bg-slate-900 border border-slate-800 rounded-2xl p-5 md:p-6 mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                     <span class="text-xs uppercase font-mono text-indigo-400 tracking-wider">Super Admin Console</span>
                     <h1 class="text-2xl font-bold text-white mt-1">Agency Control Room (Naman)</h1>
-                    <p class="text-slate-400 text-xs mt-0.5">Manage existing retail clients and provision new stores on the fly.</p>
+                    <p class="text-slate-400 text-xs mt-0.5">Manage retail stores, view shopkeeper credentials & monitor live customer interactions.</p>
                 </div>
                 <div class="mt-4 md:mt-0 flex gap-3">
                     <a href="/login" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition">Shopkeeper Login</a>
-                    <a href="/" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-lg transition">Home</a>
+                    <a href="/admin0770/dashboard" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold px-4 py-2 rounded-lg transition">Refresh Feed</a>
                 </div>
             </header>
 
@@ -285,7 +314,7 @@ async def admin_dashboard(auth: Optional[str] = None):
                         </div>
                         <div>
                             <label class="block text-xs font-mono text-slate-400 mb-1">Timings</label>
-                            <input type="text" name="hours" placeholder="e.g. 9:00 AM - 9:00 PM" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <input type="text" name="hours" placeholder="e.g. 10:00 AM - 10:00 PM" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                         </div>
                         <div>
                             <label class="block text-xs font-mono text-slate-400 mb-1">Secret PIN for Shopkeeper</label>
@@ -297,15 +326,44 @@ async def admin_dashboard(auth: Optional[str] = None):
                     </form>
                 </div>
 
-                <!-- Stores List -->
+                <!-- Stores List with Login Credentials -->
                 <div class="lg:col-span-2">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-bold text-white">Active Stores ({len(tenants)})</h2>
-                        <span class="text-xs text-slate-400 font-mono">Synced on Vercel</span>
+                        <h2 class="text-lg font-bold text-white">Active Stores & Login Credentials ({len(tenants)})</h2>
+                        <span class="text-xs text-slate-400 font-mono">All PINs Visible to Admin</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {cards_html}
                     </div>
+                </div>
+            </div>
+
+            <!-- Live Customer & User Activity Stream -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+                <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/80">
+                    <div>
+                        <h2 class="font-bold text-white text-base">👁️ Live Customer & Shop Activity Stream</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Real-time audit log of every message, order, button click, and login attempt</p>
+                    </div>
+                    <span class="text-xs text-emerald-400 flex items-center gap-1 font-mono">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Stream
+                    </span>
+                </div>
+                <div class="overflow-x-auto max-h-[460px]">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950/80 text-slate-400 font-mono text-[11px] uppercase border-b border-slate-800">
+                                <th class="p-3">Timestamp</th>
+                                <th class="p-3">Store ID</th>
+                                <th class="p-3">User / Actor</th>
+                                <th class="p-3">Action</th>
+                                <th class="p-3">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {activity_rows}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -337,8 +395,8 @@ async def add_tenant_form(
         "delivery_info": "Standard Doorstep Delivery. Free on orders above ₹499.",
         "payment_methods": "UPI & Cash on Delivery (COD)",
         "featured_items": [
-            {"id": "item_1", "name": "Featured Special Product 1", "price": "₹150"},
-            {"id": "item_2", "name": "Featured Special Product 2", "price": "₹250"}
+            {"id": "item_1", "name": "Featured Special Item 1", "price": "₹150"},
+            {"id": "item_2", "name": "Featured Special Item 2", "price": "₹250"}
         ],
         "faq": [
             {"question": "What are your shop timings?", "answer": f"We are open daily: {hours}."},
@@ -346,6 +404,7 @@ async def add_tenant_form(
         ]
     }
     tenant_manager.save_tenant(clean_id, new_data)
+    db.log_activity(clean_id, "admin", "STORE_PROVISIONED", f"Created shop {business_name} (Phone: {phone}, PIN: {pin_code})")
     return RedirectResponse(url="/admin0770/dashboard?created=ok", status_code=303)
 
 # ==================== WEBHOOK & MESSAGING ====================
@@ -398,7 +457,6 @@ async def trigger_broadcast(
     validity: Optional[str] = Form(None),
     offer_message: Optional[str] = Form(None),
 ):
-    """Broadcast custom discount or raw message to all store customers."""
     if broadcast_type == "discount" and discount_percent:
         res = await broadcast_service.send_broadcast(
             tenant_id=tenant_id,
@@ -413,11 +471,11 @@ async def trigger_broadcast(
         )
 
     sent = res.get("sent_count", 0)
+    db.log_activity(tenant_id, "shopkeeper", "BROADCAST_SENT", f"Blasted offer to {sent} customers: {res.get('message_sent', '')[:50]}...")
     return RedirectResponse(url=f"/dashboard?tenant_id={tenant_id}&broadcast_sent={sent}", status_code=303)
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def shop_owner_dashboard(tenant_id: str = "praveen_general_store", broadcast_sent: int = None):
-    """Shop Owner Mobile & Desktop Portal."""
     profile = tenant_manager.get_tenant(tenant_id) or {}
     shop_name = profile.get("business_name", "Shop Portal")
     category = profile.get("category", "")

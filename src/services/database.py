@@ -7,7 +7,6 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-# In serverless environments like Vercel, the filesystem is read-only except /tmp
 if os.environ.get("VERCEL"):
     DB_DIR = "/tmp/data"
     DB_PATH = "/tmp/data/local_bot.db"
@@ -85,7 +84,35 @@ class Database:
                     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+
+            # Live Activity Logs for Super Admin oversight
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS activity_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tenant_id TEXT NOT NULL,
+                    actor TEXT NOT NULL,
+                    action_type TEXT NOT NULL,
+                    details TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
             conn.commit()
+
+    def log_activity(self, tenant_id: str, actor: str, action_type: str, details: str):
+        """Logs user and shop actions for Super Admin audit trail."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO activity_logs (tenant_id, actor, action_type, details)
+                VALUES (?, ?, ?, ?)
+            """, (tenant_id, actor, action_type, details))
+            conn.commit()
+
+    def list_activities(self, limit: int = 50) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM activity_logs ORDER BY id DESC LIMIT ?", (limit,))
+            return [dict(row) for row in cursor.fetchall()]
 
     def register_customer(self, customer_phone: str, tenant_id: str, customer_name: str = ""):
         with self.get_connection() as conn:
