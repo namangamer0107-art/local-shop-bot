@@ -7,7 +7,13 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "local_bot.db")
+# In serverless environments like Vercel, the filesystem is read-only except /tmp
+if os.environ.get("VERCEL"):
+    DB_DIR = "/tmp/data"
+    DB_PATH = "/tmp/data/local_bot.db"
+else:
+    DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+    DB_PATH = os.path.join(DB_DIR, "local_bot.db")
 
 class Database:
     def __init__(self, db_path: str = DB_PATH):
@@ -22,7 +28,6 @@ class Database:
 
     def init_db(self):
         with self.get_connection() as conn:
-            # 1. Appointments Table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS appointments (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +41,6 @@ class Database:
                 )
             """)
 
-            # 2. Orders Table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS orders (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +55,6 @@ class Database:
                 )
             """)
 
-            # 3. Persistent User State Table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS user_states (
                     customer_phone TEXT PRIMARY KEY,
@@ -62,7 +65,6 @@ class Database:
                 )
             """)
 
-            # 4. Customers Audience Table (For Daily Offers & Broadcasts)
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS customers (
                     customer_phone TEXT NOT NULL,
@@ -74,7 +76,6 @@ class Database:
                 )
             """)
 
-            # 5. Broadcast Campaign History
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS broadcasts (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,7 +88,6 @@ class Database:
             conn.commit()
 
     def register_customer(self, customer_phone: str, tenant_id: str, customer_name: str = ""):
-        """Register or update customer interaction for promotional broadcasts."""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -100,7 +100,6 @@ class Database:
             conn.commit()
 
     def get_broadcast_subscribers(self, tenant_id: str) -> List[Dict[str, Any]]:
-        """Fetch all opt-in customers for a store."""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT customer_phone, customer_name FROM customers WHERE tenant_id = ? AND opt_in = 1", (tenant_id,))
