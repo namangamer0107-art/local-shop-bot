@@ -1,0 +1,40 @@
+{
+  "tenant_id": "praveen_general_store",
+  "business_name": "Praveen Kirana & General Store",
+  "owner_name": "Praveen Kumar Jain",
+  "category": "Daily Provisions, Namkeen, Biscuits & Kirana",
+  "address": "Near New Ashok Nagar Metro (Opposite Eastend Apartments), Delhi - 110096",
+  "phone": "+919818348152",
+  "owner_phone": "+919818348152",
+  "pin_code": "7890",
+  "hours": "Daily: 10:00 AM - 10:00 PM (All 7 Days Open)",
+  "delivery_info": "Doorstep Delivery across Eastend Apartments & New Ashok Nagar. Free delivery on orders above ₹499.",
+  "payment_methods": "UPI (GPay / PhonePe / Paytm), Cash on Delivery (COD)",
+  "popular_categories": [
+    "Fresh Atta, Rice & Pulses (दाल, चावल, आटा)",
+    "Namkeen, Biscuits & Snacks (नमकीन और बिस्कुट)",
+    "Dairy, Bread & Daily Staples (दूध, ब्रेड और घी)",
+    "Packaged Foods & Beverages (चाय, चीनी और मसाले)"
+  ],
+  "featured_items": [
+    {"id": "item_1", "name": "Fresh Chakki Atta (5kg)", "price": "₹240"},
+    {"id": "item_2", "name": "Haldiram / Bikano Namkeen Mixture (400g)", "price": "₹120"},
+    {"id": "item_3", "name": "Fortune Refined Oil (1L)", "price": "₹135"},
+    {"id": "item_4", "name": "Amul Butter (500g)", "price": "₹285"},
+    {"id": "item_5", "name": "Tata Tea Premium (500g)", "price": "₹260"}
+  ],
+  "faq": [
+    {
+      "question": "Where is the shop located?",
+      "answer": "Opposite Eastend Apartments, near New Ashok Nagar Metro Station, Delhi 110096."
+    },
+    {
+      "question": "What are your shop timings?",
+      "answer": "We are open all 7 days from 10:00 AM to 10:00 PM."
+    },
+    {
+      "question": "What is the delivery time?",
+      "answer": "Typically 30 to 45 minutes for Eastend Apartments and Ashok Nagar residents."
+    }
+  ]
+}

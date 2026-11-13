@@ -1,0 +1,11 @@
+.env
+.git
+__pycache__/
+*.pyc
+data/
+*.log
+scratch/
+search_dump.html
+maps_dump.txt
+scratch_maps.py
+parse_maps.py

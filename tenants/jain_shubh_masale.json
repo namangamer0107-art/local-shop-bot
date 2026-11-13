@@ -1,0 +1,49 @@
+{
+  "tenant_id": "jain_shubh_masale",
+  "business_name": "Jain Shubh Masale (जैन शुभ मसाले)",
+  "category": "Pure Spices, Fresh Flours & Grocery Store",
+  "address": "New Ashok Nagar, Delhi / NCR (Near Metro Station)",
+  "hours": "Mon-Sat: 10:00 AM - 7:00 PM (Sunday Closed or Open till 2:00 PM)",
+  "phone": "+919958240721",
+  "owner_phone": "+919958240721",
+  "delivery_info": "Standard Doorstep Delivery within 2 Days. Free Delivery on all orders above ₹999. For orders below ₹999, nominal delivery charges apply.",
+  "free_delivery_threshold": 999,
+  "payment_methods": "UPI (Google Pay, PhonePe, Paytm), Cash on Delivery (COD)",
+  "popular_categories": [
+    "Pure Ground Spices (शुद्ध पिसे मसाले)",
+    "Whole Spices & Khada Masala (साबुत खड़े मसाले)",
+    "Fresh Shudh Chakki Atta (ताज़ा चक्की आटा)",
+    "Ghee & Edible Oils (शुद्ध घी और तेल)",
+    "Dry Fruits & Herbs (मेवे और जड़ी बूटियां)"
+  ],
+  "featured_items": [
+    {"id": "item_1", "name": "Fresh Shudh Chakki Atta (ताज़ा चक्की आटा)", "price": "₹65 / kg"},
+    {"id": "item_2", "name": "Shubh Haldi Powder (Pure Turmeric 500g)", "price": "₹160"},
+    {"id": "item_3", "name": "Shubh Lal Mirch Powder (Spicy Red Chilli 500g)", "price": "₹210"},
+    {"id": "item_4", "name": "Shubh Dhaniya Powder (Coriander 500g)", "price": "₹150"},
+    {"id": "item_5", "name": "Special Shahi Garam Masala (100g)", "price": "₹95"},
+    {"id": "item_6", "name": "Premium Hing (Pure Asafoetida 50g)", "price": "₹140"}
+  ],
+  "faq": [
+    {
+      "question": "What is the price of Atta?",
+      "answer": "Our fresh, high-quality Shudh Chakki Atta is ₹65 per kg. Freshly ground and packed!"
+    },
+    {
+      "question": "What are your shop timings?",
+      "answer": "We are open from 10:00 AM to 7:00 PM. Messages received after 7:00 PM will be processed the next business morning."
+    },
+    {
+      "question": "Where is the shop located?",
+      "answer": "Our shop is located in New Ashok Nagar, Delhi / NCR. Contact: +919958240721."
+    },
+    {
+      "question": "What are the delivery terms and time?",
+      "answer": "Delivery is completed within 2 days. Delivery is completely FREE on orders above ₹999!"
+    },
+    {
+      "question": "What are your spices specialties?",
+      "answer": "100% pure, unadulterated spices (100% शुद्धता की गारंटी), freshly ground without artificial colors or preservatives."
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "business_name": "Luxe Unisex Hair & Beauty Lounge",
+  "category": "Salon & Spa",
+  "address": "42 Market Street, Central City (Opposite Metro Pillar 110)",
+  "hours": "Mon-Sat: 10:00 AM - 8:30 PM, Sun: 11:00 AM - 6:00 PM",
+  "phone": "+1-555-0199",
+  "services": [
+    {
+      "id": "srv_1",
+      "name": "Classic Haircut & Styling",
+      "price": "$25",
+      "duration": "30 mins"
+    },
+    {
+      "id": "srv_2",
+      "name": "Beard Trim & Hot Towel Grooming",
+      "price": "$18",
+      "duration": "20 mins"
+    },
+    {
+      "id": "srv_3",
+      "name": "Hydra Facial Treatment",
+      "price": "$60",
+      "duration": "45 mins"
+    },
+    {
+      "id": "srv_4",
+      "name": "Hair Spa & Deep Conditioning",
+      "price": "$45",
+      "duration": "40 mins"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Is parking available?",
+      "answer": "Yes, we have free 2-hour basement parking for all salon customers."
+    },
+    {
+      "question": "What payment methods do you accept?",
+      "answer": "We accept Cash, Credit/Debit cards, UPI, Apple Pay, and Google Pay."
+    },
+    {
+      "question": "Do I need an appointment or can I walk in?",
+      "answer": "Walk-ins are welcome, but booking in advance ensures zero wait time!"
+    }
+  ],
+  "available_slots": [
+    "Today 4:00 PM",
+    "Today 5:30 PM",
+    "Tomorrow 11:00 AM",
+    "Tomorrow 2:00 PM",
+    "Tomorrow 4:30 PM"
+  ]
+}

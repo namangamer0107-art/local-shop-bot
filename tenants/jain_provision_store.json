@@ -1,0 +1,43 @@
+{
+  "tenant_id": "jain_provision_store",
+  "business_name": "Jain Provision Store (जैन प्रोविजन स्टोर)",
+  "category": "Kirana & Daily Grocery Store",
+  "address": "Sector 1 / Near New Ashok Nagar Road, Noida (Delhi-NCR Border)",
+  "hours": "Daily: 7:30 AM - 10:00 PM (All 7 Days Open)",
+  "phone": "+91 98765 43210",
+  "owner_phone": "+91 98765 43210",
+  "delivery_info": "Free Home Delivery on orders above ₹499 within 2 km radius. Typical delivery time: 30-45 minutes.",
+  "payment_methods": "UPI (Google Pay, PhonePe, Paytm), Cash on Delivery (COD), Credit/Debit Cards",
+  "popular_categories": [
+    "Atta, Rice & Dals (आटा, दाल, चावल)",
+    "Cooking Oils & Ghee (तेल और शुद्ध घी)",
+    "Dairy, Milk & Bread (दूध, दही, ब्रेड)",
+    "Spices & Dry Fruits (मसाले और ड्राई फ्रूट्स)",
+    "Personal Care & Cleaning (साबुन, डिटर्जेंट)"
+  ],
+  "featured_items": [
+    {"id": "item_1", "name": "Aashirvaad Shudh Chakki Atta (5kg)", "price": "₹245"},
+    {"id": "item_2", "name": "Fortune Sunlite Refined Oil (1L Pouch)", "price": "₹140"},
+    {"id": "item_3", "name": "Amul Pure Cow Ghee (1L)", "price": "₹610"},
+    {"id": "item_4", "name": "Tata Sampann Toor Dal (1kg)", "price": "₹175"},
+    {"id": "item_5", "name": "India Gate Basmati Rice Classic (1kg)", "price": "₹190"}
+  ],
+  "faq": [
+    {
+      "question": "What is the minimum order for free home delivery?",
+      "answer": "Minimum order for free home delivery is ₹499 within 2 km. For orders below ₹499, delivery charge is ₹30."
+    },
+    {
+      "question": "How quickly do you deliver?",
+      "answer": "We deliver to your doorstep within 30 to 45 minutes of order confirmation."
+    },
+    {
+      "question": "Can I just send a handwritten list photo or type my list?",
+      "answer": "Yes! You can type your grocery list directly here or send a photo of your paper list. We will pack it and confirm the bill."
+    },
+    {
+      "question": "Do you accept UPI or Cash on Delivery?",
+      "answer": "Both! You can pay via UPI (GPay/PhonePe/Paytm) upon delivery or pay in cash."
+    }
+  ]
+}
